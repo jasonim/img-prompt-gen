@@ -25,22 +25,16 @@ async function readPngSize(file) {
   return { width: png.readUInt32BE(16), height: png.readUInt32BE(20) }
 }
 
-test('local release is runnable but excludes personal data and pairing credentials', async () => {
+test('local release is an unpack-and-load extension with no Node service or personal data', async () => {
   const outDir = await mkdtemp(path.join(tmpdir(), 'zhiju-release-'))
   const release = await buildReleaseStaging({ rootDir: root, outDir, generatedAt: '2026-08-22T00:00:00.000Z' })
 
   await access(path.join(release.localDir, 'extension/manifest.json'))
-  await access(path.join(release.localDir, 'server/index.js'))
-  await access(path.join(release.localDir, '启动服务.command'))
-  await access(path.join(release.localDir, '启动服务-Windows.cmd'))
+  await access(path.join(release.localDir, '安装说明.md'))
 
   const files = await listFiles(release.localDir)
-  assert.equal(files.some((file) => file.includes('.secrets') || file.includes('.txn') || file.endsWith('.revision.lock')), false)
-
-  const captures = await readFile(path.join(release.localDir, 'data/captures.jsonl'), 'utf8')
-  const prompts = JSON.parse(await readFile(path.join(release.localDir, 'data/prompts.json'), 'utf8'))
-  assert.equal(captures, '{"recordType":"meta","schemaVersion":1,"revision":0}\n')
-  assert.deepEqual(prompts.prompts, [])
+  assert.equal(files.some((file) => file.startsWith('server') || file.startsWith('data') || file === 'package.json'), false)
+  assert.equal(files.some((file) => /启动服务|pairing|\.secrets|\.txn|\.revision\.lock/.test(file)), false)
 })
 
 test('web store staging has manifest at ZIP root and contains extension code only', async () => {
@@ -62,7 +56,8 @@ test('release metadata is deterministic apart from the injected build time', asy
   assert.equal(metadata.version, '0.1.0')
   assert.equal(metadata.generatedAt, '2026-08-22T00:00:00.000Z')
   assert.equal(metadata.containsUserData, false)
-  assert.equal(metadata.requiresNode, '>=22 <25')
+  assert.equal(metadata.requiresNode, false)
+  assert.equal(metadata.storage, 'IndexedDB')
 })
 
 test('store assets include correctly sized mandatory artwork', async () => {

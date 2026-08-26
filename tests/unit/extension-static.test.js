@@ -5,12 +5,12 @@ import path from 'node:path'
 
 const root = path.resolve(import.meta.dirname, '../..')
 
-test('manifest is MV3, Chrome 116+, and requests only scoped permissions', async () => {
+test('manifest is MV3, Chrome 116+, and needs no localhost access', async () => {
   const manifest = JSON.parse(await readFile(path.join(root, 'extension/manifest.json'), 'utf8'))
   assert.equal(manifest.manifest_version, 3)
   assert.equal(manifest.minimum_chrome_version, '116')
   assert.deepEqual(manifest.permissions.sort(), ['clipboardWrite', 'contextMenus', 'sidePanel', 'storage'].sort())
-  assert.deepEqual(manifest.host_permissions, ['http://127.0.0.1/*'])
+  assert.equal('host_permissions' in manifest, false)
 })
 
 test('side panel avoids inline handlers and unsafe HTML rendering', async () => {
@@ -20,7 +20,10 @@ test('side panel avoids inline handlers and unsafe HTML rendering', async () => 
   ])
   assert.doesNotMatch(html, /\son\w+=/i)
   assert.doesNotMatch(script, /\.innerHTML\s*=/)
-  for (const id of ['pairing-view', 'library-view', 'workbench-view', 'queue-view', 'editor-view']) {
+  assert.doesNotMatch(html, /配对|npm start|43119/)
+  assert.doesNotMatch(script, /createApiClient|isPaired|showPairing/)
+  assert.match(script, /createIndexedDbClient/)
+  for (const id of ['app-shell', 'library-view', 'workbench-view', 'queue-view', 'editor-view']) {
     assert.match(html, new RegExp(`id=["']${id}["']`))
   }
 })
@@ -28,8 +31,7 @@ test('side panel avoids inline handlers and unsafe HTML rendering', async () => 
 test('narrow side panel explicitly prevents horizontal clipping', async () => {
   const css = await readFile(path.join(root, 'extension/sidepanel.css'), 'utf8')
   assert.match(css, /overflow-x:\s*hidden/)
-  assert.match(css, /\.pairing-panel\s*\{[^}]*width:\s*auto/s)
-  assert.match(css, /\.pairing-panel\s*\{[^}]*margin:\s*24px\s+20px/s)
+  assert.doesNotMatch(css, /\.pairing-panel\s*\{/)
   assert.match(css, /\.masthead\s*>\s*div\s*\{[^}]*min-width:\s*0/s)
 })
 

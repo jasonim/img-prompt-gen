@@ -20,5 +20,8 @@
     "package:release": "node scripts/package-release.js",
     "start": "node server/index.js",
     "verify": "npm run check:contracts && npm run check:syntax && npm run test:coverage && npm run validate && npm run smoke:server"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.4"
   }
 }
