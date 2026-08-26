@@ -12,8 +12,8 @@ function byteLength(value) {
 function normalizeError(error) {
   return {
     code: error?.code ?? 'sync_failed',
-    message: error?.message ?? '同步失败',
-    nextAction: error?.nextAction ?? '启动本地服务后重试'
+    message: error?.message ?? '本机保存失败',
+    nextAction: error?.nextAction ?? '稍后重试；如果仍失败，请检查浏览器存储空间'
   }
 }
 
@@ -73,11 +73,11 @@ export function createQueueManager({
     try {
       const queue = await readQueue(storage)
       queue.push(item)
-      await persist(queue, { status: 'queued', id: item.id, message: '已在浏览器本地暂存，正在同步' })
+      await persist(queue, { status: 'queued', id: item.id, message: '已暂存，正在写入本机词库' })
     } catch {
       return { status: 'storage_failed', message: '浏览器暂存失败，内容未发送' }
     }
-    return { status: 'queued', id: item.id, message: '已在浏览器本地暂存，正在同步' }
+    return { status: 'queued', id: item.id, message: '已暂存，正在写入本机词库' }
   }
 
   async function doDrain() {
@@ -100,7 +100,7 @@ export function createQueueManager({
         updatedAt: now().toISOString(),
         lastError: null
       }
-      await persist(queue, { status: 'syncing', id: candidate.id, message: '正在写入本地词库' })
+      await persist(queue, { status: 'syncing', id: candidate.id, message: '正在写入 IndexedDB 词库' })
       try {
         await api.createCapture({
           id: candidate.id,
@@ -118,7 +118,7 @@ export function createQueueManager({
             syncedAt: now().toISOString(),
             updatedAt: now().toISOString()
           }
-          await persist(queue, { status: 'synced', id: candidate.id, message: '已同步到本地词库' })
+          await persist(queue, { status: 'synced', id: candidate.id, message: '已保存到本机词库' })
         }
       } catch (error) {
         queue = await readQueue(storage)
@@ -131,7 +131,7 @@ export function createQueueManager({
             updatedAt: now().toISOString(),
             lastError: normalizeError(error)
           }
-          await persist(queue, { status: 'failed', id: candidate.id, message: error?.message ?? '同步失败，内容仍在本地暂存' })
+          await persist(queue, { status: 'failed', id: candidate.id, message: error?.message ?? '保存失败，内容仍在浏览器暂存' })
         }
       }
     }

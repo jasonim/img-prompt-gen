@@ -1,14 +1,15 @@
 {
   "name": "img-prompt-gen",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=22 <25"
   },
   "scripts": {
-    "test": "node --test",
-    "test:coverage": "node --experimental-test-coverage --test --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=80",
+    "test": "node --test tests/unit/capture-queue.test.js tests/unit/extension-static.test.js tests/unit/indexeddb-client.test.js tests/unit/library-model.test.js tests/unit/package-release.test.js tests/unit/review-model.test.js tests/unit/usage-model.test.js",
+    "test:coverage": "node --experimental-test-coverage --test --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=80 tests/unit/capture-queue.test.js tests/unit/extension-static.test.js tests/unit/indexeddb-client.test.js tests/unit/library-model.test.js tests/unit/package-release.test.js tests/unit/review-model.test.js tests/unit/usage-model.test.js",
+    "test:legacy-server": "node --test tests/unit/compiler.test.js tests/unit/pairing.test.js tests/unit/schemas.test.js tests/unit/storage.test.js tests/integration/crud.test.js tests/integration/server.test.js",
     "validate": "node scripts/validate-data.js",
     "compile": "node scripts/compile-runtime.js",
     "check:contracts": "node scripts/check-contracts.js",
@@ -19,7 +20,7 @@
     "pairing:reset": "node scripts/pairing-reset.js",
     "package:release": "node scripts/package-release.js",
     "start": "node server/index.js",
-    "verify": "npm run check:contracts && npm run check:syntax && npm run test:coverage && npm run validate && npm run smoke:server"
+    "verify": "npm run check:contracts && npm run check:syntax && npm run test:coverage && npm run package:release"
   },
   "devDependencies": {
     "fake-indexeddb": "^6.2.4"

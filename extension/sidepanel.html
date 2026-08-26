@@ -13,25 +13,14 @@
         <h1>生图词库收录器</h1>
         <p class="subtitle">收藏、整理并随时复制你的 Prompt</p>
       </div>
-      <span id="service-status" class="status-dot" title="服务状态">未连接</span>
+      <span id="service-status" class="status-dot" title="本地存储状态">本机</span>
     </header>
 
-    <section id="pairing-view" class="pairing-panel" aria-labelledby="pairing-title">
-      <h2 id="pairing-title">连接你的本地词库</h2>
-      <p>先在项目目录运行 <code>npm start</code>，再输入终端显示的一次性配对密钥。密钥只用于证明 43119 端口上的服务确实属于你。</p>
-      <form id="pairing-form" class="stack-form">
-        <label for="pairing-secret">一次性配对密钥</label>
-        <input id="pairing-secret" name="secret" type="password" autocomplete="off" required minlength="12" placeholder="粘贴终端中的密钥">
-        <button class="button primary" type="submit">验证并连接</button>
-      </form>
-      <p id="pairing-message" class="form-message" role="status"></p>
-    </section>
-
-    <div id="app-shell" hidden>
+    <div id="app-shell">
       <nav class="section-nav" aria-label="词库区域">
         <button class="nav-tab active" type="button" data-target="library-view">词库</button>
         <button class="nav-tab" type="button" data-target="workbench-view">待整理</button>
-        <button class="nav-tab" type="button" data-target="queue-view">暂存</button>
+        <button class="nav-tab" type="button" data-target="queue-view">保存</button>
         <button class="nav-tab" type="button" data-target="editor-view">编辑</button>
       </nav>
 
@@ -63,8 +52,13 @@
 
         <section id="queue-view" class="view" aria-labelledby="queue-title" hidden>
           <div class="section-heading">
-            <div><h2 id="queue-title">浏览器暂存</h2><p class="section-kicker">离线内容会在这里等待同步</p></div>
-            <button id="retry-queue-button" class="button quiet" type="button">重试全部</button>
+            <div><h2 id="queue-title">保存记录</h2><p class="section-kicker">写入 IndexedDB 的本机状态</p></div>
+            <button id="retry-queue-button" class="button quiet" type="button">重试未完成项</button>
+          </div>
+          <div class="button-row backup-actions">
+            <button id="export-backup-button" class="button quiet" type="button">导出备份</button>
+            <label class="button quiet file-button" for="import-backup-input">导入备份</label>
+            <input id="import-backup-input" type="file" accept="application/json,.json" hidden>
           </div>
           <p id="last-capture-status" class="section-note" role="status"></p>
           <div id="queue-list" class="entry-list"></div>

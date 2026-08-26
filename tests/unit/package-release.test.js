@@ -44,6 +44,7 @@ test('web store staging has manifest at ZIP root and contains extension code onl
 
   assert.equal(files.includes('manifest.json'), true)
   assert.equal(files.includes('icons/icon-128.png'), true)
+  assert.equal(files.includes('lib/api-client.js'), false)
   assert.equal(files.some((file) => file.startsWith('server') || file.startsWith('data') || file === 'package.json'), false)
   assert.equal(files.some((file) => file.endsWith('.pem') || file.endsWith('.key')), false)
 })
@@ -53,7 +54,7 @@ test('release metadata is deterministic apart from the injected build time', asy
   const release = await buildReleaseStaging({ rootDir: root, outDir, generatedAt: '2026-08-22T00:00:00.000Z' })
   const metadata = JSON.parse(await readFile(path.join(release.localDir, 'release-manifest.json'), 'utf8'))
 
-  assert.equal(metadata.version, '0.1.0')
+  assert.equal(metadata.version, '0.2.0')
   assert.equal(metadata.generatedAt, '2026-08-22T00:00:00.000Z')
   assert.equal(metadata.containsUserData, false)
   assert.equal(metadata.requiresNode, false)

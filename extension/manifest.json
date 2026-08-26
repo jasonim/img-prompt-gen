@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "minimum_chrome_version": "116",
   "name": "枝句 · 生图词库",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "从网页右键收录视觉描述，在本地侧栏整理为原子词、组合配方和常用 Prompt。",
   "icons": {
     "16": "icons/icon-16.png",
@@ -15,9 +15,6 @@
     "storage",
     "sidePanel",
     "clipboardWrite"
-  ],
-  "host_permissions": [
-    "http://127.0.0.1/*"
   ],
   "background": {
     "service_worker": "service-worker.js",

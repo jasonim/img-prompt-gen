@@ -39,3 +39,14 @@ test('compact card presentation provides a title, preview, and useful tags', () 
     tags: ['常用 Prompt', '完整指令']
   })
 })
+
+test('card presentation handles recipes, unknown labels, and unnamed prompts', () => {
+  assert.deepEqual(presentEntry({ type: 'recipe', name: '配方', derivedPrompt: '正文', termIds: ['a', 'b'] }), {
+    title: '配方', body: '正文', tags: ['组合配方', '2 个原子词']
+  })
+  assert.deepEqual(presentEntry({ type: 'term', name: '未知', category: 'custom', responsibility: 'custom_role' }), {
+    title: '未知', body: 'custom · custom_role', tags: ['原子词', 'custom', 'custom_role']
+  })
+  assert.deepEqual(presentEntry(null), { title: '未命名 Prompt', body: '', tags: ['常用 Prompt', '完整指令'] })
+  assert.deepEqual(flattenLibrary(), [])
+})

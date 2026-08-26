@@ -77,11 +77,6 @@ h3 { margin: 0; font-size: 14px; line-height: 1.35; }
 .status-dot.online { border-color: #bcd2c9; color: var(--accent); background: var(--accent-soft); }
 .status-dot.error { border-color: #e1bbb3; color: var(--danger); background: #fff4f1; }
 
-.pairing-panel { width: auto; margin: 24px 20px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); overflow-wrap: anywhere; }
-.pairing-panel h2 { margin-bottom: 8px; }
-.pairing-panel p { color: var(--text-soft); }
-code { padding: 2px 5px; border-radius: 4px; color: var(--accent); background: var(--accent-soft); }
-
 .section-nav {
   position: sticky;
   z-index: 15;
@@ -130,6 +125,8 @@ label { color: #4e554f; font-size: 11px; font-weight: 700; }
 .stack-form { display: grid; gap: 8px; }
 .field-group { display: grid; gap: 8px; }
 .button-row { display: flex; gap: 7px; margin-top: 5px; }
+.backup-actions { margin: 0 0 12px; flex-wrap: wrap; }
+.file-button { display: inline-flex; align-items: center; cursor: pointer; }
 .button { border: 1px solid var(--line-strong); border-radius: 8px; padding: 7px 10px; color: var(--text); background: var(--surface); font-size: 11px; font-weight: 700; }
 .button:hover { border-color: #aeb5ad; background: var(--surface-muted); }
 .button.primary { border-color: var(--accent); color: #fff; background: var(--accent); }

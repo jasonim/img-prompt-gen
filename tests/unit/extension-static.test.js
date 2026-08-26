@@ -23,6 +23,9 @@ test('side panel avoids inline handlers and unsafe HTML rendering', async () => 
   assert.doesNotMatch(html, /配对|npm start|43119/)
   assert.doesNotMatch(script, /createApiClient|isPaired|showPairing/)
   assert.match(script, /createIndexedDbClient/)
+  assert.match(html, /id=["']export-backup-button["']/)
+  assert.match(html, /id=["']import-backup-input["']/)
+  assert.match(script, /importSources/)
   for (const id of ['app-shell', 'library-view', 'workbench-view', 'queue-view', 'editor-view']) {
     assert.match(html, new RegExp(`id=["']${id}["']`))
   }

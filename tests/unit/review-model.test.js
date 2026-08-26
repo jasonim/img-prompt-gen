@@ -23,3 +23,14 @@ test('organize payload rejects terms missing category or responsibility', () => 
     recipe: null
   }), /分类|职责/)
 })
+
+test('organize payload rejects stale, empty, unnamed, and incomplete recipe input', () => {
+  assert.throws(() => buildOrganizePayload({ expectedRevision: null, terms: [] }), /当前数据版本/)
+  assert.throws(() => buildOrganizePayload({ expectedRevision: 1, terms: [] }), /至少添加/)
+  assert.throws(() => buildOrganizePayload({ expectedRevision: 1, terms: [{ id: 'term_1', name: ' ', category: 'other', responsibility: 'other' }] }), /缺少名称/)
+  assert.throws(() => buildOrganizePayload({
+    expectedRevision: 1,
+    terms: [{ id: 'term_1', name: '词', category: 'other', responsibility: 'other' }],
+    recipe: { id: 'recipe_1', name: '配方', derivedPrompt: ' ' }
+  }), /完整 Prompt/)
+})

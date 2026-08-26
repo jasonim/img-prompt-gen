@@ -1,18 +1,19 @@
-import { createApiClient } from './lib/api-client.js'
+import { createIndexedDbClient } from './lib/indexeddb-client.js'
 import { createQueueManager, LAST_CAPTURE_STATUS_KEY, QUEUE_KEY } from './lib/capture-queue.js'
 import { CATEGORY_LABELS, RESPONSIBILITY_LABELS, filterLibrary, presentEntry } from './lib/library-model.js'
 import { buildOrganizePayload } from './lib/review-model.js'
 import { createUsageTracker, USAGE_COUNTS_KEY } from './lib/usage-model.js'
 
-const api = createApiClient()
+const api = createIndexedDbClient()
 const queue = createQueueManager({ storage: chrome.storage.local, api })
 const usage = createUsageTracker(chrome.storage.local)
 
 const dom = Object.fromEntries([
-  'service-status', 'pairing-view', 'pairing-form', 'pairing-secret', 'pairing-message', 'app-shell',
+  'service-status', 'app-shell',
   'library-view', 'workbench-view', 'queue-view', 'editor-view', 'library-search', 'type-filter',
   'category-filter', 'library-summary', 'library-list', 'workbench-list', 'queue-list',
-  'last-capture-status', 'retry-queue-button', 'new-entry-button', 'entity-form', 'entity-id',
+  'last-capture-status', 'retry-queue-button', 'export-backup-button', 'import-backup-input',
+  'new-entry-button', 'entity-form', 'entity-id',
   'entity-type', 'entity-title', 'term-fields', 'recipe-fields', 'text-fields', 'entity-category',
   'entity-responsibility', 'entity-term-ids', 'entity-text', 'delete-entry-button', 'editor-message',
   'organize-form', 'organize-capture-id', 'organize-source', 'organize-term-rows',
@@ -75,12 +76,6 @@ function activateView(viewId) {
     view.classList.toggle('active-view', active)
   }
   for (const tab of document.querySelectorAll('.nav-tab')) tab.classList.toggle('active', tab.dataset.target === viewId)
-}
-
-function showPairing(show) {
-  dom['pairing-view'].hidden = !show
-  dom['app-shell'].hidden = show
-  if (show) setServiceStatus('待配对', 'error')
 }
 
 function emptyState(message) {
@@ -177,7 +172,7 @@ function renderWorkbench() {
 }
 
 function queueLabel(item) {
-  return item.state === 'synced' ? '已同步' : item.state === 'syncing' ? '同步中' : item.state === 'failed' ? '仅本地暂存' : '等待同步'
+  return item.state === 'synced' ? '已保存' : item.state === 'syncing' ? '保存中' : item.state === 'failed' ? '等待重试' : '等待保存'
 }
 
 async function renderQueue() {
@@ -186,7 +181,7 @@ async function renderQueue() {
     const card = element('article', 'entry-card capture')
     card.append(element('div', 'entry-meta', queueLabel(item)))
     card.append(element('h3', 'entry-title', item.id))
-    card.append(element('p', 'entry-body', item.text ?? `同步于 ${item.syncedAt ?? item.updatedAt}`))
+    card.append(element('p', 'entry-body', item.text ?? `保存于 ${item.syncedAt ?? item.updatedAt}`))
     const actions = element('div', 'entry-actions')
     if (item.state === 'failed' || item.state === 'queued') actions.append(button('重试', () => void retryQueue(), 'button small primary'))
     actions.append(button(item.state === 'synced' ? '清除收据' : '删除暂存', async () => {
@@ -199,7 +194,41 @@ async function renderQueue() {
   })
   dom['queue-list'].replaceChildren(...(cards.length ? cards : [emptyState('浏览器暂存区为空。')]))
   const last = (await chrome.storage.local.get(LAST_CAPTURE_STATUS_KEY))[LAST_CAPTURE_STATUS_KEY]
-  dom['last-capture-status'].textContent = last?.message ?? '右键收录的同步状态会显示在这里。'
+  dom['last-capture-status'].textContent = last?.message ?? '右键收录的本机保存状态会显示在这里。'
+}
+
+async function exportBackup() {
+  try {
+    const backup = await api.exportSources()
+    const blob = new Blob([`${JSON.stringify(backup, null, 2)}\n`], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `zhiju-backup-${new Date().toISOString().slice(0, 10)}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+    showCopyToast('备份已导出')
+  } catch (error) {
+    dom['last-capture-status'].textContent = error.nextAction ?? error.message
+  }
+}
+
+async function importBackup(file) {
+  if (!file) return
+  try {
+    const backup = JSON.parse(await file.text())
+    const health = await api.health()
+    const counts = health.counts
+    const hasData = counts.captures + counts.sourceTerms + counts.sourceRecipes + counts.sourcePrompts > 0
+    if (hasData && !confirm('导入会替换当前扩展内的全部词库。请先导出备份，确定继续吗？')) return
+    const imported = await api.importSources(backup, { expectedRevision: health.sourceRevision })
+    await loadData()
+    dom['last-capture-status'].textContent = `导入完成：${Object.values(imported.importedCounts).reduce((sum, count) => sum + count, 0)} 条记录`
+  } catch (error) {
+    dom['last-capture-status'].textContent = error.nextAction ?? error.message
+  } finally {
+    dom['import-backup-input'].value = ''
+  }
 }
 
 function syncEditorFields() {
@@ -296,21 +325,17 @@ async function deleteCapture(capture) {
 }
 
 async function retryQueue() {
-  setServiceStatus('同步中')
+  setServiceStatus('保存中')
   await queue.drain()
   await renderQueue()
   try {
     await loadData()
   } catch {
-    setServiceStatus('仅本地', 'error')
+    setServiceStatus('存储异常', 'error')
   }
 }
 
 async function loadData() {
-  if (!(await api.isPaired())) {
-    showPairing(true)
-    return
-  }
   try {
     const [library, workbench, health, usageCounts] = await Promise.all([api.getLibrary(), api.getWorkbench(), api.health(), usage.all()])
     state.library = library
@@ -319,8 +344,7 @@ async function loadData() {
     renderLibrary()
     renderWorkbench()
     await renderQueue()
-    showPairing(false)
-    setServiceStatus(`R${health.sourceRevision} · 在线`, 'online')
+    setServiceStatus(`R${health.sourceRevision} · 本机`, 'online')
     if (!state.initialViewResolved) {
       const libraryCount = library.terms.length + library.recipes.length + library.prompts.length
       const pendingCount = workbench.captures.length + workbench.terms.length + workbench.recipes.length + workbench.prompts.length
@@ -328,28 +352,11 @@ async function loadData() {
       state.initialViewResolved = true
     }
   } catch (error) {
-    if (error.code === 'authentication_required' || error.code === 'invalid_token') showPairing(true)
-    else {
-      showPairing(false)
-      setServiceStatus('服务离线', 'error')
-      await renderQueue()
-    }
+    setServiceStatus('存储异常', 'error')
+    await renderQueue()
+    setMessage(dom['editor-message'], error.nextAction ?? error.message)
   }
 }
-
-dom['pairing-form'].addEventListener('submit', async (event) => {
-  event.preventDefault()
-  setMessage(dom['pairing-message'], '正在验证服务身份…')
-  try {
-    await api.pair(dom['pairing-secret'].value)
-    dom['pairing-secret'].value = ''
-    setMessage(dom['pairing-message'], '配对成功', true)
-    await queue.drain()
-    await loadData()
-  } catch (error) {
-    setMessage(dom['pairing-message'], error.nextAction ?? error.message)
-  }
-})
 
 for (const tab of document.querySelectorAll('.nav-tab')) tab.addEventListener('click', () => activateView(tab.dataset.target))
 dom['library-search'].addEventListener('input', renderLibrary)
@@ -358,6 +365,8 @@ dom['category-filter'].addEventListener('change', renderLibrary)
 dom['entity-type'].addEventListener('change', syncEditorFields)
 dom['new-entry-button'].addEventListener('click', () => openEntityEditor())
 dom['retry-queue-button'].addEventListener('click', () => void retryQueue())
+dom['export-backup-button'].addEventListener('click', () => void exportBackup())
+dom['import-backup-input'].addEventListener('change', () => void importBackup(dom['import-backup-input'].files?.[0]))
 dom['add-term-row-button'].addEventListener('click', () => addTermRow())
 
 dom['entity-form'].addEventListener('submit', async (event) => {
@@ -435,6 +444,4 @@ fillSelect(dom['category-filter'], CATEGORY_LABELS, '全部分类')
 fillSelect(dom['entity-category'], CATEGORY_LABELS)
 fillSelect(dom['entity-responsibility'], RESPONSIBILITY_LABELS)
 syncEditorFields()
-void loadData().then(async () => {
-  if (await api.isPaired()) void queue.drain().then(loadData)
-})
+void loadData().then(() => queue.drain()).then(loadData)

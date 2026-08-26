@@ -1,8 +1,8 @@
-import { createApiClient } from './lib/api-client.js'
+import { createIndexedDbClient } from './lib/indexeddb-client.js'
 import { createQueueManager, LAST_CAPTURE_STATUS_KEY } from './lib/capture-queue.js'
 
 const MENU_ID = 'save-to-image-prompt-library'
-const api = createApiClient()
+const api = createIndexedDbClient()
 const queue = createQueueManager({ storage: chrome.storage.local, api })
 
 chrome.runtime.onInstalled.addListener(() => {
