@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+dist/
+.DS_Store
+data/.secrets/
+data/.txn/
+data/.revision.lock
+*.log

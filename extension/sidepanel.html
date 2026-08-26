@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>生图词库收录器</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="brand-mark" aria-hidden="true">句</div>
+      <div class="brand-copy">
+        <h1>生图词库收录器</h1>
+        <p class="subtitle">收藏、整理并随时复制你的 Prompt</p>
+      </div>
+      <span id="service-status" class="status-dot" title="服务状态">未连接</span>
+    </header>
+
+    <section id="pairing-view" class="pairing-panel" aria-labelledby="pairing-title">
+      <h2 id="pairing-title">连接你的本地词库</h2>
+      <p>先在项目目录运行 <code>npm start</code>，再输入终端显示的一次性配对密钥。密钥只用于证明 43119 端口上的服务确实属于你。</p>
+      <form id="pairing-form" class="stack-form">
+        <label for="pairing-secret">一次性配对密钥</label>
+        <input id="pairing-secret" name="secret" type="password" autocomplete="off" required minlength="12" placeholder="粘贴终端中的密钥">
+        <button class="button primary" type="submit">验证并连接</button>
+      </form>
+      <p id="pairing-message" class="form-message" role="status"></p>
+    </section>
+
+    <div id="app-shell" hidden>
+      <nav class="section-nav" aria-label="词库区域">
+        <button class="nav-tab active" type="button" data-target="library-view">词库</button>
+        <button class="nav-tab" type="button" data-target="workbench-view">待整理</button>
+        <button class="nav-tab" type="button" data-target="queue-view">暂存</button>
+        <button class="nav-tab" type="button" data-target="editor-view">编辑</button>
+      </nav>
+
+      <main>
+        <section id="library-view" class="view active-view" aria-labelledby="library-title">
+          <div class="section-heading">
+            <div><h2 id="library-title">我的 Prompt</h2><p class="section-kicker">已审核，可直接使用</p></div>
+            <button id="new-entry-button" class="button quiet" type="button">＋ 新增</button>
+          </div>
+          <div class="filter-strip">
+            <label class="search-field"><span>搜索</span><input id="library-search" type="search" placeholder="搜索标题、内容或标签…"></label>
+            <select id="type-filter" aria-label="内容类型">
+              <option value="all">全部类型</option>
+              <option value="term">原子词</option>
+              <option value="recipe">组合配方</option>
+              <option value="prompt">常用 Prompt</option>
+            </select>
+            <select id="category-filter" aria-label="浏览分类"><option value="all">全部分类</option></select>
+          </div>
+          <p id="library-summary" class="microcopy"></p>
+          <div id="library-list" class="entry-list"></div>
+        </section>
+
+        <section id="workbench-view" class="view" aria-labelledby="workbench-title" hidden>
+          <div class="section-heading"><div><h2 id="workbench-title">待整理</h2><p class="section-kicker">收录内容与待审核条目</p></div></div>
+          <p class="section-note">原料先保留，判断清楚后再批准。机器通过不等于人工审核。</p>
+          <div id="workbench-list" class="entry-list"></div>
+        </section>
+
+        <section id="queue-view" class="view" aria-labelledby="queue-title" hidden>
+          <div class="section-heading">
+            <div><h2 id="queue-title">浏览器暂存</h2><p class="section-kicker">离线内容会在这里等待同步</p></div>
+            <button id="retry-queue-button" class="button quiet" type="button">重试全部</button>
+          </div>
+          <p id="last-capture-status" class="section-note" role="status"></p>
+          <div id="queue-list" class="entry-list"></div>
+        </section>
+
+        <section id="editor-view" class="view" aria-labelledby="editor-title" hidden>
+          <div class="section-heading"><div><h2 id="editor-title">编辑条目</h2><p class="section-kicker">保存后进入人工审核</p></div></div>
+          <form id="entity-form" class="stack-form">
+            <input id="entity-id" type="hidden">
+            <label for="entity-type">条目类型</label>
+            <select id="entity-type">
+              <option value="term">原子词</option>
+              <option value="recipe">组合配方</option>
+              <option value="prompt">常用 Prompt</option>
+            </select>
+            <label for="entity-title">名称</label>
+            <input id="entity-title" required maxlength="120">
+            <div id="term-fields" class="field-group">
+              <label for="entity-category">浏览分类</label>
+              <select id="entity-category"></select>
+              <label for="entity-responsibility">视觉职责</label>
+              <select id="entity-responsibility"></select>
+            </div>
+            <div id="recipe-fields" class="field-group" hidden>
+              <label for="entity-term-ids">原子词 ID（逗号分隔）</label>
+              <input id="entity-term-ids">
+            </div>
+            <div id="text-fields" class="field-group" hidden>
+              <label for="entity-text">完整 Prompt</label>
+              <textarea id="entity-text" rows="7"></textarea>
+            </div>
+            <div class="button-row">
+              <button class="button primary" type="submit">保存到待审核</button>
+              <button id="delete-entry-button" class="button danger" type="button" hidden>删除</button>
+            </div>
+          </form>
+
+          <form id="organize-form" class="stack-form" hidden>
+            <input id="organize-capture-id" type="hidden">
+            <p id="organize-source" class="source-quote"></p>
+            <div class="row-heading"><h3>原子词</h3><button id="add-term-row-button" class="button quiet" type="button">＋ 添加一词</button></div>
+            <div id="organize-term-rows" class="term-rows"></div>
+            <label for="organize-recipe-name">组合配方名（可选）</label>
+            <input id="organize-recipe-name" placeholder="例如：青绿卧室俯卧人像">
+            <label for="organize-recipe-prompt">配方完整 Prompt</label>
+            <textarea id="organize-recipe-prompt" rows="6"></textarea>
+            <button class="button primary" type="submit">保存拆词与配方</button>
+          </form>
+          <p id="editor-message" class="form-message" role="status"></p>
+        </section>
+      </main>
+    </div>
+    <div id="copy-toast" class="copy-toast" role="status" aria-live="polite" hidden>已复制</div>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

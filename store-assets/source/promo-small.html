@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>枝句宣传图</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 880px; height: 560px; margin: 0; overflow: hidden; }
+    body { position: relative; display: grid; place-items: center; color: #20332e; background: linear-gradient(145deg, #f5eee4, #e7eee9); font-family: Inter, "PingFang SC", system-ui, sans-serif; }
+    body::before, body::after { position: absolute; border-radius: 50%; content: ""; background: rgba(49,95,85,.08); }
+    body::before { width: 360px; height: 360px; left: -150px; top: -180px; }
+    body::after { width: 420px; height: 420px; right: -190px; bottom: -240px; }
+    .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 320px; align-items: center; gap: 54px; width: 750px; }
+    .logo { display: grid; width: 86px; height: 86px; place-items: center; border-radius: 23px; color: #fff; background: #315f55; box-shadow: 0 15px 40px rgba(49,95,85,.24); font-size: 40px; font-weight: 800; }
+    h1 { margin: 24px 0 9px; font-family: Georgia, "Songti SC", serif; font-size: 54px; }
+    .lead { margin: 0; color: #53625d; font-size: 22px; line-height: 1.5; }
+    .panel { transform: rotate(2deg); border: 1px solid rgba(49,95,85,.16); border-radius: 20px; padding: 22px; background: rgba(255,255,255,.86); box-shadow: 0 24px 55px rgba(38,54,46,.14); }
+    .bar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 14px; font-weight: 800; }
+    .mini { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 8px; color: #fff; background: #315f55; }
+    .card { margin-top: 10px; border: 1px solid #dde2dc; border-radius: 12px; padding: 13px 14px; background: #fff; }
+    .card b { display: block; margin-bottom: 5px; font-size: 13px; }
+    .card span { color: #778079; font-size: 10px; }
+    .tag { display: inline-block; margin-top: 8px; margin-right: 3px; border-radius: 999px; padding: 3px 8px; color: #315f55; background: #e9f1ee; font-size: 9px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section><div class="logo">句</div><h1>枝句</h1><p class="lead">收藏 · 整理 · 复制<br>你的 Prompt 词库</p></section>
+    <section class="panel"><div class="bar"><span class="mini">句</span>生图词库收录器</div><div class="card"><b>电影感自然窗光</b><span>soft natural window light…</span><br><i class="tag">光线</i><i class="tag">电影感</i></div><div class="card"><b>青绿色低饱和</b><span>muted teal palette…</span><br><i class="tag">色彩</i><i class="tag">氛围</i></div></section>
+  </div>
+</body>
+</html>

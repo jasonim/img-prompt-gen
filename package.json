@@ -1,0 +1,24 @@
+{
+  "name": "img-prompt-gen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --experimental-test-coverage --test --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=80",
+    "validate": "node scripts/validate-data.js",
+    "compile": "node scripts/compile-runtime.js",
+    "check:contracts": "node scripts/check-contracts.js",
+    "check:syntax": "node scripts/check-syntax.js",
+    "smoke:server": "node scripts/smoke-server.js",
+    "health": "node scripts/health.js",
+    "read:library": "node scripts/read-library.js",
+    "pairing:reset": "node scripts/pairing-reset.js",
+    "package:release": "node scripts/package-release.js",
+    "start": "node server/index.js",
+    "verify": "npm run check:contracts && npm run check:syntax && npm run test:coverage && npm run validate && npm run smoke:server"
+  }
+}
