@@ -1,0 +1,52 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "隐私政策 · 枝句",
+  description: "枝句 Chrome 扩展隐私政策。",
+};
+
+export default function Privacy() {
+  return (
+    <main className="policy">
+      <header className="hero">
+        <a className="back" href="/">← 返回枝句</a>
+        <h1>隐私政策</h1>
+        <p className="date">生效日期：2026 年 8 月 26 日</p>
+      </header>
+      <article>
+        <p>枝句是一款在 Chrome 扩展内本地运行的工具，用于收录、整理和复用用户主动选择或输入的 Prompt 文字。</p>
+
+        <h2>收集的数据</h2>
+        <p>只有当用户主动使用右键菜单或编辑表单时，扩展才会处理对应文字。扩展不收集网页 URL、页面标题、HTML、Cookie、登录信息、完整浏览历史或剪贴板历史。</p>
+
+        <h2>数据用途</h2>
+        <p>文字仅用于生成用户自己的本地 Prompt 词库，并支持整理、搜索、审核、备份和复制。</p>
+
+        <h2>数据存储与传输</h2>
+        <p>词库保存在 Chrome 为本扩展隔离的 IndexedDB 中；可靠写入队列、短期保存收据和复制次数保存在 <code>chrome.storage.local</code>。扩展不连接本地配套服务、开发者服务器或第三方服务器，不上传正文或 Prompt。</p>
+
+        <h2>数据共享</h2>
+        <p>开发者不接收、出售或向第三方共享用户数据。</p>
+
+        <h2>数据保留与删除</h2>
+        <p>数据会一直保存在扩展本地存储中，直到用户删除条目、导入其他备份替换词库，或卸载扩展。卸载前可使用“导出备份”下载 JSON；该文件由用户自行保管。</p>
+
+        <h2>安全措施</h2>
+        <p>所有产品 JavaScript 均随扩展打包，不加载远程代码。导入备份时会在写入前校验结构、引用和审核证据，并以 IndexedDB 原子事务提交。</p>
+
+        <h2>权限说明</h2>
+        <ul>
+          <li><code>contextMenus</code>：为用户主动选择的文字提供保存菜单。</li>
+          <li><code>storage</code>：保存可靠写入队列、短期收据和本机复制次数。</li>
+          <li><code>sidePanel</code>：提供词库、整理台、备份和编辑界面。</li>
+          <li><code>clipboardWrite</code>：仅在用户点击复制时写入 Prompt。</li>
+        </ul>
+        <p>扩展不申请网站主机权限。</p>
+
+        <h2>联系我们</h2>
+        <p>如有隐私问题，请通过枝句在 Chrome 网上应用店商品详情页所列的开发者支持方式联系我们。</p>
+      </article>
+      <footer><span>枝句 · 生图词库收录器</span><a href="/">安装与下载</a></footer>
+    </main>
+  );
+}
