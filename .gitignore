@@ -5,4 +5,10 @@ dist/
 data/.secrets/
 data/.txn/
 data/.revision.lock
+data/CURRENT
+data/captures.jsonl
+data/terms.json
+data/recipes.json
+data/prompts.json
+data/runtime/library.json
 *.log
